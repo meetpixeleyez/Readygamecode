@@ -1,0 +1,190 @@
+@font-face {
+  font-family: "icomoon";
+  src: url("../moon-fonts/icomoon.eot?r71ikm");
+  src: url("../moon-fonts/icomoon.eot?r71ikm#iefix") format("embedded-opentype"),
+    url("../moon-fonts/icomoon.ttf?r71ikm") format("truetype"),
+    url("../moon-fonts/icomoon.woff?r71ikm") format("woff"),
+    url("../moon-fonts/icomoon.svg?r71ikm#icomoon") format("svg");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="icon-"],
+[class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: "icomoon" !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-Add-to-collection1:before {
+  content: "\e90e";
+}
+.icon-Logoutttt:before {
+  content: "\e900";
+}
+.icon-money-bag-Icon:before {
+  content: "\e901";
+}
+.icon-monitorrr:before {
+  content: "\e902";
+}
+.icon-Profileee:before {
+  content: "\e903";
+}
+.icon-Settingsss:before {
+  content: "\e904";
+}
+.icon-Uploaddd:before {
+  content: "\e905";
+}
+.icon-userrr:before {
+  content: "\e906";
+}
+.icon-arrow-rightt:before {
+  content: "\e907";
+}
+.icon-Calendarr:before {
+  content: "\e908";
+}
+.icon-Dashboardd:before {
+  content: "\e909";
+}
+.icon-deletee:before {
+  content: "\e90a";
+}
+.icon-Downloadd:before {
+  content: "\e90b";
+}
+.icon-eye-iconn:before {
+  content: "\e90c";
+}
+.icon-heartt:before {
+  content: "\e90d";
+}
+.icon-Add-to-Cart-Button:before {
+  content: "\e931";
+}
+.icon-Add-to-collection:before {
+  content: "\e932";
+}
+.icon-Author-Afiliate:before {
+  content: "\e933";
+}
+.icon-Author-Award:before {
+  content: "\e934";
+}
+.icon-Author-Badge:before {
+  content: "\e935";
+}
+.icon-Author-Crown:before {
+  content: "\e936";
+}
+.icon-Author-Diomond:before {
+  content: "\e937";
+}
+.icon-Author-Tranding:before {
+  content: "\e938";
+}
+.icon-Behance:before {
+  content: "\e939";
+}
+.icon-Bulet-Icon:before {
+  content: "\e93a";
+}
+.icon-Candel:before {
+  content: "\e93b";
+}
+.icon-Cart:before {
+  content: "\e93c";
+}
+.icon-Check-Button:before {
+  content: "\e93d";
+}
+.icon-Dimond:before {
+  content: "\e93e";
+}
+.icon-Dribbble:before {
+  content: "\e93f";
+}
+.icon-Drown-Arrow-Line:before {
+  content: "\e940";
+}
+.icon-Dwon-Arrow:before {
+  content: "\e941";
+}
+.icon-facebook:before {
+  content: "\e942";
+}
+.icon-Fackbook:before {
+  content: "\e943";
+}
+.icon-Favaret:before {
+  content: "\e944";
+}
+.icon-Filter:before {
+  content: "\e945";
+}
+.icon-google-1:before {
+  content: "\e946";
+}
+.icon-Gride-View:before {
+  content: "\e947";
+}
+.icon-Info:before {
+  content: "\e948";
+}
+.icon-Left-Arrow:before {
+  content: "\e949";
+}
+.icon-Linkdin1:before {
+  content: "\e94a";
+}
+.icon-List-View:before {
+  content: "\e94b";
+}
+.icon-Pagination-Arrow-Left:before {
+  content: "\e94c";
+}
+.icon-Pagination-Arrow-Right:before {
+  content: "\e94d";
+}
+.icon-Pricing:before {
+  content: "\e94e";
+}
+.icon-Radio-Button-Active:before {
+  content: "\e94f";
+}
+.icon-Radio-Button-deactive:before {
+  content: "\e950";
+}
+.icon-Rating-Star:before {
+  content: "\e951";
+}
+.icon-Remove:before {
+  content: "\e952";
+}
+.icon-Right-Aroow:before {
+  content: "\e953";
+}
+.icon-Search:before {
+  content: "\e954";
+}
+.icon-Share-Icon:before {
+  content: "\e955";
+}
+.icon-Support2:before {
+  content: "\e956";
+}
+.icon-Twitter:before {
+  content: "\e957";
+}

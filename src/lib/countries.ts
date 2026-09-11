@@ -1,0 +1,101 @@
+export interface Country {
+  name: string;
+  code: string;
+  dialCode: string;
+  flag: string;
+}
+
+export const COUNTRIES: Country[] = [
+  { name: "India", code: "IN", dialCode: "+91", flag: "🇮🇳" },
+  { name: "United States", code: "US", dialCode: "+1", flag: "🇺🇸" },
+  { name: "United Kingdom", code: "GB", dialCode: "+44", flag: "🇬🇧" },
+  { name: "Canada", code: "CA", dialCode: "+1", flag: "🇨🇦" },
+  { name: "Australia", code: "AU", dialCode: "+61", flag: "🇦🇺" },
+  { name: "Germany", code: "DE", dialCode: "+49", flag: "🇩🇪" },
+  { name: "France", code: "FR", dialCode: "+33", flag: "🇫🇷" },
+  { name: "Brazil", code: "BR", dialCode: "+55", flag: "🇧🇷" },
+  { name: "Indonesia", code: "ID", dialCode: "+62", flag: "🇮🇩" },
+  { name: "Pakistan", code: "PK", dialCode: "+92", flag: "🇵🇰" },
+  { name: "Bangladesh", code: "BD", dialCode: "+880", flag: "🇧🇩" },
+  { name: "United Arab Emirates", code: "AE", dialCode: "+971", flag: "🇦🇪" },
+  { name: "Saudi Arabia", code: "SA", dialCode: "+966", flag: "🇸🇦" },
+  { name: "Singapore", code: "SG", dialCode: "+65", flag: "🇸🇬" },
+  { name: "Malaysia", code: "MY", dialCode: "+60", flag: "🇲🇾" },
+  { name: "Nigeria", code: "NG", dialCode: "+234", flag: "🇳🇬" },
+  { name: "Philippines", code: "PH", dialCode: "+63", flag: "🇵🇭" },
+  { name: "Vietnam", code: "VN", dialCode: "+84", flag: "🇻🇳" },
+  { name: "Russia", code: "RU", dialCode: "+7", flag: "🇷🇺" },
+  { name: "Japan", code: "JP", dialCode: "+81", flag: "🇯🇵" },
+  { name: "South Korea", code: "KR", dialCode: "+82", flag: "🇰🇷" },
+  { name: "China", code: "CN", dialCode: "+86", flag: "🇨🇳" },
+  { name: "Mexico", code: "MX", dialCode: "+52", flag: "🇲🇽" },
+  { name: "Spain", code: "ES", dialCode: "+34", flag: "🇪🇸" },
+  { name: "Italy", code: "IT", dialCode: "+39", flag: "🇮🇹" },
+  { name: "Netherlands", code: "NL", dialCode: "+31", flag: "🇳🇱" },
+  { name: "Turkey", code: "TR", dialCode: "+90", flag: "🇹🇷" },
+  { name: "Egypt", code: "EG", dialCode: "+20", flag: "🇪🇬" },
+  { name: "South Africa", code: "ZA", dialCode: "+27", flag: "🇿🇦" },
+  { name: "Argentina", code: "AR", dialCode: "+54", flag: "🇦🇷" },
+  { name: "Colombia", code: "CO", dialCode: "+57", flag: "🇨🇴" },
+  { name: "Ukraine", code: "UA", dialCode: "+380", flag: "🇺🇦" },
+  { name: "Poland", code: "PL", dialCode: "+48", flag: "🇵🇱" },
+  { name: "Kenya", code: "KE", dialCode: "+254", flag: "🇰🇪" },
+  { name: "Ghana", code: "GH", dialCode: "+233", flag: "🇬🇭" },
+  { name: "Nepal", code: "NP", dialCode: "+977", flag: "🇳🇵" },
+  { name: "Sri Lanka", code: "LK", dialCode: "+94", flag: "🇱🇰" },
+];
+
+export const STATES_AND_CITIES: Record<string, Record<string, string[]>> = {
+  India: {
+    Gujarat: ["Surat", "Ahmedabad", "Vadodara", "Rajkot", "Bhavnagar", "Jamnagar", "Gandhinagar"],
+    Maharashtra: ["Mumbai", "Pune", "Nagpur", "Thane", "Nashik", "Aurangabad", "Solapur"],
+    Delhi: ["New Delhi", "North Delhi", "South Delhi", "East Delhi", "West Delhi"],
+    Karnataka: ["Bengaluru", "Mysuru", "Hubballi", "Mangaluru", "Belagavi"],
+    TamilNadu: ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem"],
+    Telangana: ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar"],
+    UttarPradesh: ["Noida", "Lucknow", "Kanpur", "Agra", "Varanasi", "Ghaziabad"],
+    WestBengal: ["Kolkata", "Howrah", "Durgapur", "Siliguri"],
+    Rajasthan: ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Bikaner"],
+    Punjab: ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Chandigarh"],
+    Kerala: ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur"],
+  },
+  "United States": {
+    California: ["Los Angeles", "San Francisco", "San Diego", "San Jose", "Sacramento", "Fresno"],
+    NewYork: ["New York City", "Buffalo", "Rochester", "Yonkers", "Syracuse", "Albany"],
+    Texas: ["Houston", "San Antonio", "Dallas", "Austin", "Fort Worth", "El Paso"],
+    Florida: ["Miami", "Orlando", "Tampa", "Jacksonville", "Tallahassee", "St. Petersburg"],
+    Illinois: ["Chicago", "Aurora", "Naperville", "Joliet", "Rockford", "Springfield"],
+    Washington: ["Seattle", "Spokane", "Tacoma", "Vancouver", "Bellevue"],
+    Georgia: ["Atlanta", "Augusta", "Columbus", "Macon", "Savannah"],
+  },
+  "United Kingdom": {
+    England: ["London", "Manchester", "Birmingham", "Liverpool", "Leeds", "Bristol", "Newcastle"],
+    Scotland: ["Edinburgh", "Glasgow", "Aberdeen", "Dundee", "Inverness"],
+    Wales: ["Cardiff", "Swansea", "Newport", "Wrexham"],
+    NorthernIreland: ["Belfast", "Derry", "Lisburn", "Newry"],
+  },
+  Canada: {
+    Ontario: ["Toronto", "Ottawa", "Mississauga", "Brampton", "Hamilton", "London"],
+    Quebec: ["Montreal", "Quebec City", "Laval", "Gatineau", "Longueuil"],
+    BritishColumbia: ["Vancouver", "Surrey", "Burnaby", "Richmond", "Victoria"],
+    Alberta: ["Calgary", "Edmonton", "Red Deer", "Lethbridge"],
+  },
+  Australia: {
+    NewSouthWales: ["Sydney", "Newcastle", "Wollongong", "Central Coast"],
+    Victoria: ["Melbourne", "Geelong", "Ballarat", "Bendigo"],
+    Queensland: ["Brisbane", "Gold Coast", "Sunshine Coast", "Townsville", "Cairns"],
+    WesternAustralia: ["Perth", "Mandurah", "Bunbury"],
+  },
+  Germany: {
+    Bavaria: ["Munich", "Nuremberg", "Augsburg", "Regensburg"],
+    Berlin: ["Berlin"],
+    NorthRhineWestphalia: ["Cologne", "Düsseldorf", "Dortmund", "Essen"],
+    BadenWurttemberg: ["Stuttgart", "Karlsruhe", "Mannheim", "Freiburg"],
+  },
+  UnitedArabEmirates: {
+    Dubai: ["Dubai"],
+    AbuDhabi: ["Abu Dhabi", "Al Ain"],
+    Sharjah: ["Sharjah"],
+    Ajman: ["Ajman"],
+  },
+};

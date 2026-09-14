@@ -30,6 +30,7 @@ export default function AdminNewProductPage() {
     priceCl: "",
     demoUrl: "",
     demoApk: "",
+    fileUrl: "",
     previewVideo: "",
     tags: [] as string[],
     metaTitle: "",
@@ -131,8 +132,12 @@ export default function AdminNewProductPage() {
       toast({ title: "Error", description: "Please select a Category and Subcategory.", variant: "destructive" });
       return;
     }
-    if ((!thumbnailFile && !uploadedUrls.thumbnail) || (!mainFile && !uploadedUrls.file)) {
-      toast({ title: "Error", description: "Thumbnail and Main File are required.", variant: "destructive" });
+    if (!thumbnailFile && !uploadedUrls.thumbnail) {
+      toast({ title: "Error", description: "Thumbnail image is required.", variant: "destructive" });
+      return;
+    }
+    if (!mainFile && !uploadedUrls.file && !form.fileUrl.trim()) {
+      toast({ title: "Error", description: "Main File (ZIP file or Google Drive / Download link) is required.", variant: "destructive" });
       return;
     }
 
@@ -161,6 +166,9 @@ export default function AdminNewProductPage() {
         setScreenshotsFiles([]);
       }
 
+      const finalMainFile = finalUrls.file || form.fileUrl.trim();
+      const finalDemoApk = finalUrls.demoApk || form.demoApk || form.demoUrl || "";
+
       const res = await fetch("/api/admin/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -173,8 +181,8 @@ export default function AdminNewProductPage() {
           storeOptimizationPrice: parseFloat(form.storeOptimizationPrice) || 0,
           tags: form.tags,
           thumbnail: finalUrls.thumbnail,
-          file: finalUrls.file,
-          demoApk: finalUrls.demoApk || "",
+          file: finalMainFile,
+          demoApk: finalDemoApk,
           inlinePreviewImage: JSON.stringify(finalUrls.inlinePreviewImage),
         }),
       });
@@ -384,22 +392,41 @@ export default function AdminNewProductPage() {
               </div>
             </div>
             <div className="space-y-3">
-              <Label>Main File (ZIP) *</Label>
+              <Label htmlFor="mainFileUrl">Main File (ZIP) / Google Drive Link *</Label>
+              <Input
+                id="mainFileUrl"
+                type="url"
+                placeholder="https://drive.google.com/file/d/... or Direct Download Link"
+                value={form.fileUrl}
+                onChange={(e) => setForm({ ...form, fileUrl: e.target.value })}
+              />
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-4">
                   <Label htmlFor="mainFile" className="flex items-center justify-center px-4 py-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 cursor-pointer rounded-md border text-sm font-medium transition-colors">
                     <Upload className="w-4 h-4 mr-2" />
-                    Choose File
+                    {mainFile || uploadedUrls.file || form.fileUrl ? "Upload ZIP File Instead" : "Upload ZIP File"}
                   </Label>
-                  <Input id="mainFile" type="file" accept=".zip,.rar,.7z" className="hidden" required={!mainFile && !uploadedUrls.file} onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) setMainFile(e.target.files[0]);
+                  <Input id="mainFile" type="file" accept=".zip,.rar,.7z" className="hidden" onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      const file = e.target.files[0];
+                      if (file.size > 10 * 1024 * 1024) {
+                        toast({
+                          title: "File size exceeds 10MB",
+                          description: `"${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)}MB) is too large. Maximum 10MB is allowed for file uploading. Please use the Google Drive / Download link option above for larger files.`,
+                          variant: "destructive",
+                        });
+                        e.target.value = "";
+                        return;
+                      }
+                      setMainFile(file);
+                    }
                   }} />
-                  {!mainFile && !uploadedUrls.file && <span className="text-sm text-muted-foreground">No file chosen</span>}
+                  {!mainFile && !uploadedUrls.file && !form.fileUrl && <span className="text-sm text-muted-foreground">ZIP file or Drive link required </span>}
                 </div>
                 {mainFile ? (
                   <div className="flex items-center justify-between p-3 border rounded-md max-w-sm">
-                    <span className="text-sm truncate mr-4">{mainFile.name}</span>
-                    <button type="button" onClick={() => setMainFile(null)} className="text-muted-foreground hover:text-destructive">
+                    <span className="text-sm truncate mr-4">{mainFile.name} ({(mainFile.size / 1024 / 1024).toFixed(1)} MB)</span>
+                    <button type="button" onClick={() => setMainFile(null)} className="cursor-pointer text-muted-foreground hover:text-destructive">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
@@ -408,10 +435,13 @@ export default function AdminNewProductPage() {
                     <span className="text-sm truncate mr-4 text-blue-600 font-medium">
                       {uploadedUrls.file.split('/').pop()}
                     </span>
+                    <button type="button" onClick={() => setUploadedUrls((prev: any) => ({ ...prev, file: "" }))} className="cursor-pointer text-muted-foreground hover:text-destructive">
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
                 ) : null}
               </div>
-              <p className="text-xs text-muted-foreground">ZIP all the files for buyers.</p>
+              <p className="text-xs text-muted-foreground">Max 10MB allowed for direct upload. For files above 10MB, please provide a Google Drive / Download link above.</p>
             </div>
             <div className="space-y-3">
               <Label htmlFor="demoApk">Demo APK / Google Drive Link</Label>
@@ -419,24 +449,36 @@ export default function AdminNewProductPage() {
                 id="demoApk"
                 type="url"
                 placeholder="https://drive.google.com/file/d/... or APK URL"
-                value={form.demoUrl}
-                onChange={(e) => setForm({ ...form, demoUrl: e.target.value })}
+                value={form.demoApk || form.demoUrl}
+                onChange={(e) => setForm({ ...form, demoApk: e.target.value, demoUrl: e.target.value })}
               />
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-4">
                   <Label htmlFor="demoApkFile" className="flex items-center justify-center px-4 py-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 cursor-pointer rounded-md border text-sm font-medium transition-colors">
                     <Upload className="w-4 h-4 mr-2" />
-                    Upload APK File Instead
+                    {demoApkFile || uploadedUrls.demoApk || form.demoApk || form.demoUrl ? "Upload APK File Instead" : "Upload APK File"}
                   </Label>
                   <Input id="demoApkFile" type="file" accept=".apk,.zip,.rar" className="hidden" onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) setDemoApkFile(e.target.files[0]);
+                    if (e.target.files && e.target.files[0]) {
+                      const file = e.target.files[0];
+                      if (file.size > 10 * 1024 * 1024) {
+                        toast({
+                          title: "File size exceeds 10MB",
+                          description: `"${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)}MB) is too large. Maximum 10MB is allowed for file uploading. Please use the Google Drive / Download link option above for larger files.`,
+                          variant: "destructive",
+                        });
+                        e.target.value = "";
+                        return;
+                      }
+                      setDemoApkFile(file);
+                    }
                   }} />
-                  {!demoApkFile && !uploadedUrls.demoApk && <span className="text-sm text-muted-foreground">Optional</span>}
+                  {!demoApkFile && !uploadedUrls.demoApk && !form.demoApk && !form.demoUrl && <span className="text-sm text-muted-foreground">Optional (Max 10MB)</span>}
                 </div>
                 {demoApkFile ? (
                   <div className="flex items-center justify-between p-3 border rounded-md max-w-sm">
-                    <span className="text-sm truncate mr-4">{demoApkFile.name}</span>
-                    <button type="button" onClick={() => setDemoApkFile(null)} className="text-muted-foreground hover:text-destructive">
+                    <span className="text-sm truncate mr-4">{demoApkFile.name} ({(demoApkFile.size / 1024 / 1024).toFixed(1)} MB)</span>
+                    <button type="button" onClick={() => setDemoApkFile(null)} className="cursor-pointer text-muted-foreground hover:text-destructive">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
@@ -445,10 +487,13 @@ export default function AdminNewProductPage() {
                     <span className="text-sm truncate mr-4 text-blue-600 font-medium">
                       {uploadedUrls.demoApk.split('/').pop()}
                     </span>
+                    <button type="button" onClick={() => setUploadedUrls((prev: any) => ({ ...prev, demoApk: "" }))} className="cursor-pointer text-muted-foreground hover:text-destructive">
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
                 ) : null}
               </div>
-              <p className="text-xs text-muted-foreground">Provide a Google Drive link or upload an APK file for prospective buyers to test for free before purchasing.</p>
+              <p className="text-xs text-muted-foreground">Max 10MB allowed for direct upload. For files above 10MB, please provide a Google Drive / Download link above.</p>
             </div>
             <div className="space-y-3">
               <Label>Screenshots</Label>

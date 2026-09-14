@@ -51,6 +51,7 @@ export default function ProductEditForm({ initialData, isAdmin }: ProductEditFor
     ...initialData,
     demoUrl: initialData.demoUrl || "",
     demoApk: initialData.demoApk || "",
+    fileUrl: initialData.file?.startsWith("http") ? initialData.file : "",
     tags: initialData.tags ? initialData.tags.split(",").map(t => t.trim()).filter(Boolean) : [] as string[],
   });
 
@@ -158,11 +159,17 @@ export default function ProductEditForm({ initialData, isAdmin }: ProductEditFor
       return;
     }
 
+    const finalMainFileCandidate = mainFile ? "" : (existingMainFile || form.fileUrl?.trim() || "");
+    if (!mainFile && !finalMainFileCandidate) {
+      toast({ title: "Error", description: "Main File (ZIP file or Google Drive / Download link) is required.", variant: "destructive" });
+      return;
+    }
+
     setSaving(true);
     try {
       let finalThumbnail = existingThumbnail;
-      let finalMainFile = existingMainFile;
-      let finalDemoApk = existingDemoApk;
+      let finalMainFile = existingMainFile || form.fileUrl?.trim() || "";
+      let finalDemoApk = existingDemoApk || form.demoApk?.trim() || form.demoUrl?.trim() || "";
       let finalScreenshots = [...existingScreenshots];
 
       if (thumbnailFile || mainFile || demoApkFile || screenshotsFiles.length > 0) {
@@ -421,21 +428,40 @@ export default function ProductEditForm({ initialData, isAdmin }: ProductEditFor
             </div>
             
             <div className="space-y-3">
-              <Label>Main File (ZIP) *</Label>
+              <Label htmlFor="mainFileUrl">Main File (ZIP) / Google Drive Link *</Label>
+              <Input
+                id="mainFileUrl"
+                type="url"
+                placeholder="https://drive.google.com/file/d/... or Direct Download Link"
+                value={form.fileUrl}
+                onChange={(e) => setForm({ ...form, fileUrl: e.target.value })}
+              />
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-4">
                   <Label htmlFor="mainFile" className="flex items-center justify-center px-4 py-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 cursor-pointer rounded-md border text-sm font-medium transition-colors">
                     <Upload className="w-4 h-4 mr-2" />
-                    Change File
+                    {mainFile || existingMainFile || form.fileUrl ? "Upload ZIP File Instead" : "Upload ZIP File"}
                   </Label>
                   <Input id="mainFile" type="file" accept=".zip,.rar,.7z" className="hidden" onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) setMainFile(e.target.files[0]);
+                    if (e.target.files && e.target.files[0]) {
+                      const file = e.target.files[0];
+                      if (file.size > 10 * 1024 * 1024) {
+                        toast({
+                          title: "File size exceeds 10MB",
+                          description: `"${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)}MB) is too large. Maximum 10MB is allowed for file uploading. Please use the Google Drive / Download link option above for larger files.`,
+                          variant: "destructive",
+                        });
+                        e.target.value = "";
+                        return;
+                      }
+                      setMainFile(file);
+                    }
                   }} />
-                  {!mainFile && !existingMainFile && <span className="text-sm text-muted-foreground">No file chosen</span>}
+                  {!mainFile && !existingMainFile && !form.fileUrl && <span className="text-sm text-muted-foreground">ZIP file or Drive link required </span>}
                 </div>
                 {mainFile ? (
                   <div className="flex items-center justify-between p-3 border rounded-md max-w-sm">
-                    <span className="text-sm truncate mr-4">{mainFile.name}</span>
+                    <span className="text-sm truncate mr-4">{mainFile.name} ({(mainFile.size / 1024 / 1024).toFixed(1)} MB)</span>
                     <button type="button" onClick={() => setMainFile(null)} className="cursor-pointer text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
                   </div>
                 ) : existingMainFile ? (
@@ -443,9 +469,11 @@ export default function ProductEditForm({ initialData, isAdmin }: ProductEditFor
                     <span className="text-sm truncate mr-4 text-blue-600 font-medium">
                       {existingMainFile.split('/').pop()}
                     </span>
+                    <button type="button" onClick={() => setExistingMainFile("")} className="cursor-pointer text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
                   </div>
                 ) : null}
               </div>
+              <p className="text-xs text-muted-foreground">Max 10MB allowed for direct upload. For files above 10MB, please provide a Google Drive / Download link above.</p>
             </div>
             
             <div className="space-y-3">
@@ -464,13 +492,25 @@ export default function ProductEditForm({ initialData, isAdmin }: ProductEditFor
                     {existingDemoApk || form.demoApk || form.demoUrl ? "Upload APK File Instead" : "Upload APK File"}
                   </Label>
                   <Input id="demoApkFile" type="file" accept=".apk,.zip,.rar" className="hidden" onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) setDemoApkFile(e.target.files[0]);
+                    if (e.target.files && e.target.files[0]) {
+                      const file = e.target.files[0];
+                      if (file.size > 10 * 1024 * 1024) {
+                        toast({
+                          title: "File size exceeds 10MB",
+                          description: `"${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)}MB) is too large. Maximum 10MB is allowed for file uploading. Please use the Google Drive / Download link option above for larger files.`,
+                          variant: "destructive",
+                        });
+                        e.target.value = "";
+                        return;
+                      }
+                      setDemoApkFile(file);
+                    }
                   }} />
-                  {!demoApkFile && !existingDemoApk && <span className="text-sm text-muted-foreground">Optional</span>}
+                  {!demoApkFile && !existingDemoApk && <span className="text-sm text-muted-foreground">Optional (Max 10MB)</span>}
                 </div>
                 {demoApkFile ? (
                   <div className="flex items-center justify-between p-3 border rounded-md max-w-sm">
-                    <span className="text-sm truncate mr-4">{demoApkFile.name}</span>
+                    <span className="text-sm truncate mr-4">{demoApkFile.name} ({(demoApkFile.size / 1024 / 1024).toFixed(1)} MB)</span>
                     <button type="button" onClick={() => setDemoApkFile(null)} className="cursor-pointer text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
                   </div>
                 ) : existingDemoApk ? (
@@ -478,10 +518,11 @@ export default function ProductEditForm({ initialData, isAdmin }: ProductEditFor
                     <span className="text-sm truncate mr-4 text-blue-600 font-medium">
                       {existingDemoApk.split('/').pop()}
                     </span>
+                    <button type="button" onClick={() => setExistingDemoApk("")} className="cursor-pointer text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
                   </div>
                 ) : null}
               </div>
-              <p className="text-xs text-muted-foreground">Provide a Google Drive link or upload an APK file for prospective buyers to test for free before purchasing.</p>
+              <p className="text-xs text-muted-foreground">Max 10MB allowed for direct upload. For files above 10MB, please provide a Google Drive / Download link above.</p>
             </div>
             
             <div className="space-y-3">

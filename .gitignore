@@ -46,8 +46,7 @@ server.log
 db/*.db
 db/*.sqlite
 
-# Uploads and temporary assets
-upload/
+# temporary assets
 tool-results/
 
 # OS metadata

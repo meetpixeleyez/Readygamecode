@@ -91,16 +91,23 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getCurrentUser();
-  const cartCtx = await getCartContext();
-  const cartCount = await db.cart.count({
-    where: cartCtx.userId ? { userId: cartCtx.userId } : { sessionId: cartCtx.sessionId },
-  });
+  let cartCount = 0;
+  let categories: any[] = [];
 
-  const categories = await db.category.findMany({
-    where: { status: 1 },
-    include: { subCategories: { where: { status: 1 }, orderBy: { name: 'asc' } } },
-    orderBy: { name: 'asc' },
-  });
+  try {
+    const cartCtx = await getCartContext();
+    cartCount = await db.cart.count({
+      where: cartCtx.userId ? { userId: cartCtx.userId } : { sessionId: cartCtx.sessionId },
+    });
+
+    categories = await db.category.findMany({
+      where: { status: 1 },
+      include: { subCategories: { where: { status: 1 }, orderBy: { name: 'asc' } } },
+      orderBy: { name: 'asc' },
+    });
+  } catch (err) {
+    console.error("Failed to load layout database data:", err);
+  }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://readygamecode.com';
 

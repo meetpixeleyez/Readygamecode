@@ -19,34 +19,45 @@ import {
 export const dynamic = "force-dynamic";
 
 async function getHomepageData() {
-  const [featuredProducts, popularProducts, blogPosts, totalProducts, totalAuthors] =
-    await Promise.all([
-      db.product.findMany({
-        where: {
-          status: 1,
-          isFeatured: 1,
-        },
-        include: { user: true },
-        orderBy: { totalSold: "desc" },
-        take: 12,
-      }),
-      db.product.findMany({
-        where: { status: 1 },
-        include: { user: true },
-        orderBy: { totalSold: "desc" },
-        take: 8,
-      }),
-      db.blogPost.findMany({
-        where: { isPublished: 1 },
-        include: { blogCategory: true },
-        orderBy: { publishedAt: "desc" },
-        take: 4,
-      }),
-      db.product.count({ where: { status: 1 } }),
-      db.user.count({ where: { isAuthor: 1 } }),
-    ]);
+  try {
+    const [featuredProducts, popularProducts, blogPosts, totalProducts, totalAuthors] =
+      await Promise.all([
+        db.product.findMany({
+          where: {
+            status: 1,
+            isFeatured: 1,
+          },
+          include: { user: true },
+          orderBy: { totalSold: "desc" },
+          take: 12,
+        }),
+        db.product.findMany({
+          where: { status: 1 },
+          include: { user: true },
+          orderBy: { totalSold: "desc" },
+          take: 8,
+        }),
+        db.blogPost.findMany({
+          where: { isPublished: 1 },
+          include: { blogCategory: true },
+          orderBy: { publishedAt: "desc" },
+          take: 4,
+        }),
+        db.product.count({ where: { status: 1 } }),
+        db.user.count({ where: { isAuthor: 1 } }),
+      ]);
 
-  return { featuredProducts, popularProducts, blogPosts, totalProducts, totalAuthors };
+    return { featuredProducts, popularProducts, blogPosts, totalProducts, totalAuthors };
+  } catch (err) {
+    console.error("Failed to load homepage data from database:", err);
+    return {
+      featuredProducts: [],
+      popularProducts: [],
+      blogPosts: [],
+      totalProducts: 0,
+      totalAuthors: 0,
+    };
+  }
 }
 
 export default async function Home() {
@@ -56,11 +67,15 @@ export default async function Home() {
   const session = await getCurrentUser();
   let userFavoriteIds = new Set<string>();
   if (session?.sub) {
-    const favs = await db.productUser.findMany({
-      where: { userId: session.sub },
-      select: { productId: true },
-    });
-    userFavoriteIds = new Set(favs.map((f) => f.productId));
+    try {
+      const favs = await db.productUser.findMany({
+        where: { userId: session.sub },
+        select: { productId: true },
+      });
+      userFavoriteIds = new Set(favs.map((f) => f.productId));
+    } catch (err) {
+      console.error("Failed to load user favorites:", err);
+    }
   }
 
   return (

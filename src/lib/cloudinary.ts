@@ -1,11 +1,16 @@
 import { v2 as cloudinary } from "cloudinary";
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "readygamecode",
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-  secure: true,
-});
+// Configure Cloudinary cleanly supporting both CLOUDINARY_URL and individual keys
+if (process.env.CLOUDINARY_URL) {
+  cloudinary.config({ secure: true });
+} else {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "readygamecode",
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true,
+  });
+}
 
 export default cloudinary;
 
@@ -22,16 +27,39 @@ export async function uploadToCloudinary(
   const { folder = "readygamecode/uploads", resourceType = "auto", filename } = options;
 
   return new Promise((resolve, reject) => {
+    const uploadParams: Record<string, any> = {
+      folder,
+      resource_type: resourceType,
+    };
+
+    if (process.env.CLOUDINARY_UPLOAD_PRESET) {
+      uploadParams.upload_preset = process.env.CLOUDINARY_UPLOAD_PRESET;
+    }
+
+    if (filename) {
+      // Extract extension if any
+      const extMatch = filename.match(/\.([a-zA-Z0-9]+)$/);
+      const ext = extMatch ? `.${extMatch[1].toLowerCase()}` : "";
+      const baseName = filename
+        .replace(/\.[^/.]+$/, "")
+        .replace(/[^a-zA-Z0-9_-]/g, "_")
+        .slice(0, 80);
+
+      const uniqueSuffix = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      // For raw files, keep the extension so downloaded files preserve file type
+      uploadParams.public_id = resourceType === "raw" 
+        ? `${baseName || "file"}_${uniqueSuffix}${ext}` 
+        : `${baseName || "file"}_${uniqueSuffix}`;
+    } else {
+      uploadParams.use_filename = true;
+      uploadParams.unique_filename = true;
+    }
+
     const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder,
-        resource_type: resourceType,
-        public_id: filename ? filename.replace(/\.[^/.]+$/, "") : undefined,
-        use_filename: true,
-        unique_filename: true,
-      },
+      uploadParams,
       (error, result) => {
         if (error || !result) {
+          console.error("Cloudinary upload_stream error:", error);
           return reject(error || new Error("Cloudinary upload failed with empty result"));
         }
         resolve({

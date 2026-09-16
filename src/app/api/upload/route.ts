@@ -97,10 +97,15 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, files: uploadedFiles });
   } catch (error: any) {
-    console.error("Upload error:", error);
+    console.error("Upload error details:", {
+      message: error?.message,
+      name: error?.name,
+      http_code: error?.http_code,
+      details: error,
+    });
     return NextResponse.json(
       { error: error?.message || "File upload failed on server" },
-      { status: 500 }
+      { status: error?.http_code || 500 }
     );
   }
 }

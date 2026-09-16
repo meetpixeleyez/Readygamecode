@@ -19,49 +19,73 @@ export const dynamic = "force-dynamic";
 export default async function AdminDashboardPage() {
   const session = await getCurrentUser();
 
-  const [
-    totalUsers,
-    totalSellers,
-    totalProducts,
-    pendingProducts,
-    pendingWithdrawals,
-    totalSalesResult,
-    recentOrders,
-    recentWithdrawals,
-    adminProducts,
-    adminStats,
-  ] = await Promise.all([
-    db.user.count(),
-    db.user.count({ where: { isAuthor: 1 } }),
-    db.product.count({ where: { status: 1 } }),
-    db.product.count({ where: { status: 0 } }),
-    db.withdrawal.count({ where: { status: 0 } }),
-    db.order.aggregate({ _sum: { amount: true } }),
-    db.order.findMany({
-      take: 5,
-      orderBy: { createdAt: "desc" },
-      include: {
-        user: { select: { username: true, email: true } },
-      },
-    }),
-    db.withdrawal.findMany({
-      take: 5,
-      where: { status: 0 },
-      orderBy: { createdAt: "desc" },
-      include: {
-        user: { select: { username: true, balance: true } },
-      },
-    }),
-    db.product.count({ where: { userId: session?.sub || "" } }),
-    db.user.findUnique({
-      where: { id: session?.sub || "" },
-      select: { totalSold: true, totalSoldAmount: true }
-    }),
-  ]);
+  let totalUsers = 0;
+  let totalSellers = 0;
+  let totalProducts = 0;
+  let pendingProducts = 0;
+  let pendingWithdrawals = 0;
+  let totalSales = 0;
+  let recentOrders: any[] = [];
+  let recentWithdrawals: any[] = [];
+  let adminProducts = 0;
+  let adminRevenue = 0;
+  let adminSalesCount = 0;
 
-  const totalSales = totalSalesResult._sum.amount || 0;
-  const adminRevenue = adminStats?.totalSoldAmount || 0;
-  const adminSalesCount = adminStats?.totalSold || 0;
+  try {
+    const [
+      usersCount,
+      sellersCount,
+      productsCount,
+      pendingProdsCount,
+      pendingWithdrawsCount,
+      totalSalesResult,
+      orders,
+      withdrawals,
+      adminProdsCount,
+      adminStats,
+    ] = await Promise.all([
+      db.user.count(),
+      db.user.count({ where: { isAuthor: 1 } }),
+      db.product.count({ where: { status: 1 } }),
+      db.product.count({ where: { status: 0 } }),
+      db.withdrawal.count({ where: { status: 0 } }),
+      db.order.aggregate({ _sum: { amount: true } }),
+      db.order.findMany({
+        take: 5,
+        orderBy: { createdAt: "desc" },
+        include: {
+          user: { select: { username: true, email: true } },
+        },
+      }),
+      db.withdrawal.findMany({
+        take: 5,
+        where: { status: 0 },
+        orderBy: { createdAt: "desc" },
+        include: {
+          user: { select: { username: true, balance: true } },
+        },
+      }),
+      db.product.count({ where: { userId: session?.sub || "" } }),
+      db.user.findUnique({
+        where: { id: session?.sub || "" },
+        select: { totalSold: true, totalSoldAmount: true }
+      }),
+    ]);
+
+    totalUsers = usersCount;
+    totalSellers = sellersCount;
+    totalProducts = productsCount;
+    pendingProducts = pendingProdsCount;
+    pendingWithdrawals = pendingWithdrawsCount;
+    totalSales = totalSalesResult?._sum?.amount || 0;
+    recentOrders = orders || [];
+    recentWithdrawals = withdrawals || [];
+    adminProducts = adminProdsCount;
+    adminRevenue = adminStats?.totalSoldAmount || 0;
+    adminSalesCount = adminStats?.totalSold || 0;
+  } catch (err) {
+    console.error("Failed to load admin dashboard statistics:", err);
+  }
 
   return (
     <div className="space-y-8">

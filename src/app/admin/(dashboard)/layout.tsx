@@ -41,24 +41,29 @@ export default async function AdminLayout({
     redirect("/admin/login");
   }
 
-  const admin = await db.user.findUnique({
-    where: { id: session.sub },
-    select: {
-      id: true,
-      firstname: true,
-      lastname: true,
-      username: true,
-      email: true,
-      role: true,
-    },
-  });
+  let admin: any = null;
+  try {
+    admin = await db.user.findUnique({
+      where: { id: session.sub },
+      select: {
+        id: true,
+        firstname: true,
+        lastname: true,
+        username: true,
+        email: true,
+        role: true,
+      },
+    });
+  } catch (err) {
+    console.error("Admin layout verification error:", err);
+  }
 
   const dbRole = admin?.role ? String(admin.role).toLowerCase() : "";
-  if (!admin || dbRole !== "admin") {
+  if ((!admin && sessionRole !== "admin") || (admin && dbRole !== "admin")) {
     redirect("/admin/login");
   }
 
-  const displayName = admin.firstname || admin.username || "Admin";
+  const displayName = admin?.firstname || admin?.username || session.username || "Admin";
   const initials = displayName.charAt(0).toUpperCase();
 
   return (

@@ -19,25 +19,13 @@ export async function GET(
       return new NextResponse("Invalid file path", { status: 400 });
     }
 
-    // Check possible locations
-    const possiblePaths = [
-      join(process.cwd(), "public", "uploads", filename),
-      join(process.cwd(), ".next", "standalone", "public", "uploads", filename),
-    ];
+    const targetPath = join(process.cwd(), "public", "uploads", filename);
 
-    let targetPath = "";
-    for (const p of possiblePaths) {
-      if (existsSync(p)) {
-        targetPath = p;
-        break;
-      }
-    }
-
-    if (!targetPath) {
+    if (!existsSync(/*turbopackIgnore: true*/ targetPath)) {
       return new NextResponse("File not found", { status: 404 });
     }
 
-    const fileStats = await stat(targetPath);
+    const fileStats = await stat(/*turbopackIgnore: true*/ targetPath);
     const ext = filename.split(".").pop()?.toLowerCase() || "";
 
     const mimeTypes: Record<string, string> = {
@@ -57,7 +45,7 @@ export async function GET(
     };
 
     const contentType = mimeTypes[ext] || "application/octet-stream";
-    const nodeStream = createReadStream(targetPath);
+    const nodeStream = createReadStream(/*turbopackIgnore: true*/ targetPath);
     const webStream = Readable.toWeb(nodeStream) as ReadableStream;
 
     return new NextResponse(webStream, {

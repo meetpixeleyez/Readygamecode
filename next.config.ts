@@ -1,8 +1,20 @@
 import type { NextConfig } from "next";
 
+const isVercel = process.env.VERCEL === "1";
+
 const nextConfig: NextConfig = {
-  output: "standalone",
-  serverExternalPackages: ["@prisma/client"],    
+  ...(isVercel ? {} : { output: "standalone" }),
+  serverExternalPackages: ["@prisma/client"],
+  outputFileTracingExcludes: {
+    "*": [
+      "./assets/**/*",
+      "./scripts/**/*",
+      "./.next/standalone/**/*",
+      "./public/uploads/**/*",
+      "./upload/**/*",
+      "./examples/**/*",
+    ],
+  },    
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,

@@ -1,0 +1,10 @@
+# Ignore large static media not served by Next.js app directly
+assets/
+scripts/
+upload/
+examples/
+prisma/seed.ts
+prisma/seed-reviews.ts
+*.md
+.git
+.github

@@ -75,7 +75,7 @@ export async function GET(
       absolutePath = join(process.cwd(), "public", fileRelativePath);
     }
 
-    if (!existsSync(absolutePath)) {
+    if (!existsSync(/*turbopackIgnore: true*/ absolutePath)) {
       // If direct file URL is external or hosted remotely, redirect securely
       if (fileRelativePath.startsWith("http://") || fileRelativePath.startsWith("https://")) {
         return NextResponse.redirect(fileRelativePath);
@@ -84,7 +84,7 @@ export async function GET(
     }
 
     const filename = absolutePath.split(/[/\\]/).pop() || `${product.id}.zip`;
-    const stream = createReadStream(absolutePath);
+    const stream = createReadStream(/*turbopackIgnore: true*/ absolutePath);
 
     return new NextResponse(stream as any, {
       headers: {

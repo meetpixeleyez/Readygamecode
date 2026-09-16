@@ -3,9 +3,9 @@
   "version": "0.2.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 9192",
+    "dev": "node api.js && next dev -p 9192",
     "build": "node --max-old-space-size=16072 ./node_modules/next/dist/bin/next build && node scripts/copy-standalone.js",
-    "start": "node .next/standalone/server.js",
+    "start": "node api.js && node .next/standalone/server.js",
     "lint": "eslint .",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",

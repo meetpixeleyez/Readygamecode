@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
-import { PlayCircle, Play, ChevronLeft, ChevronRight } from "lucide-react";
+import { PlayCircle, Play, ChevronLeft, ChevronRight, X, Eye, Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
@@ -137,7 +137,7 @@ export function ImageGallery({ images, youtubeEmbedUrl, productTitle }: ImageGal
 
   return (
     <div className="space-y-5">
-      {/* 1. Main Showcase Area (Dedicated Gameplay Video Player) */}
+      {/* 1. Main Showcase Area (Dedicated Gameplay Video Player or Universal Aspect Ratio Hero) */}
       <div className="relative aspect-[860/450] bg-black/95 rounded-2xl overflow-hidden border border-border/80 shadow-xl group">
         {activeVideoEmbedUrl ? (
           isPlayingVideo ? (
@@ -190,24 +190,44 @@ export function ImageGallery({ images, youtubeEmbedUrl, productTitle }: ImageGal
             </div>
           )
         ) : validImages.length > 0 ? (
-          /* Static Hero Image when no video exists */
+          /* Static Hero Image when no video exists: Ambient Glow + Universal Fit */
           <div
-            className="relative w-full h-full cursor-pointer"
+            className="relative w-full h-full cursor-pointer flex items-center justify-center overflow-hidden bg-black/90 group/hero"
             onClick={() => handleOpenImageModal(0)}
+            role="button"
+            tabIndex={0}
+            aria-label="Open screenshot gallery"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleOpenImageModal(0);
+              }
+            }}
           >
-            <Image
+            {/* Ambient Blurred Background for seamless aspect ratio framing */}
+            <div
+              className="absolute inset-0 bg-cover bg-center filter blur-xl opacity-30 scale-110 pointer-events-none"
+              style={{ backgroundImage: `url(${validImages[0]})` }}
+            />
+
+            {/* Foreground Image: Perfect fit for any dimension (16:9, 9:16 portrait, 1:1 square) */}
+            <img
               src={validImages[0]}
               alt={productTitle}
-              fill
-              sizes="(max-width: 1024px) 100vw, 66vw"
-              className="object-cover"
-              priority
+              className="relative z-10 max-h-full max-w-full w-auto h-auto object-contain transition-transform duration-500 group-hover/hero:scale-[1.02]"
             />
+
+            {/* Subtle Expand Hint on Hover */}
+            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/hero:opacity-100 transition-opacity z-20 flex items-center justify-center pointer-events-none">
+              <span className="bg-black/75 text-white text-xs font-medium px-3.5 py-1.5 rounded-full border border-white/20 backdrop-blur-md flex items-center gap-1.5 shadow-xl">
+                <Maximize2 className="w-3.5 h-3.5" /> Click to view full size
+              </span>
+            </div>
           </div>
         ) : null}
       </div>
 
-      {/* 2. Bottom Screenshots Carousel (Auto-Scroll with Left/Right Arrows & Hidden Scrollbar) */}
+      {/* 2. Bottom Screenshots Carousel (Universal Fit for Portrait/Landscape + Hidden Scrollbar) */}
       {validImages.length > 0 && (
         <div 
           className="space-y-3"
@@ -248,7 +268,7 @@ export function ImageGallery({ images, youtubeEmbedUrl, productTitle }: ImageGal
                   data-gallery-item
                   onClick={() => handleOpenImageModal(idx)}
                   className={cn(
-                    "cursor-pointer relative flex-shrink-0 w-56 h-32 sm:w-64 sm:h-36 md:w-72 md:h-40 rounded-xl sm:rounded-2xl overflow-hidden border-2 transition-all duration-300 group bg-muted/50 shadow-md snap-center",
+                    "cursor-pointer relative flex-shrink-0 w-56 h-32 sm:w-64 sm:h-36 md:w-72 md:h-40 rounded-xl sm:rounded-2xl overflow-hidden border-2 transition-all duration-300 group bg-black/80 shadow-md snap-center flex items-center justify-center",
                     activeThumbIndex === idx
                       ? "border-primary ring-2 ring-primary/40 scale-[1.02]"
                       : "border-border/70 opacity-90 hover:opacity-100 hover:border-primary/60"
@@ -263,14 +283,26 @@ export function ImageGallery({ images, youtubeEmbedUrl, productTitle }: ImageGal
                     }
                   }}
                 >
-                  <Image
+                  {/* Ambient Blurred Background */}
+                  <div
+                    className="absolute inset-0 bg-cover bg-center filter blur-md opacity-25 scale-110 pointer-events-none"
+                    style={{ backgroundImage: `url(${imgUrl})` }}
+                  />
+
+                  {/* Sharp Foreground Image - Fits any dimensions without cropping */}
+                  <img
                     src={imgUrl}
                     alt={`${productTitle} - Screenshot ${idx + 1}`}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    sizes="(max-width: 640px) 192px, (max-width: 768px) 240px, 288px"
-                    priority={idx < 4}
+                    className="relative z-10 max-h-full max-w-full w-auto h-auto object-contain transition-transform duration-500 group-hover:scale-105 p-1"
+                    loading={idx < 4 ? "eager" : "lazy"}
                   />
+
+                  {/* Subtle hover overlay hint */}
+                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-20 flex items-center justify-center pointer-events-none">
+                    <div className="p-2 rounded-full bg-black/60 text-white backdrop-blur-sm shadow-lg scale-90 group-hover:scale-100 transition-transform">
+                      <Eye className="w-4 h-4" />
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -310,41 +342,62 @@ export function ImageGallery({ images, youtubeEmbedUrl, productTitle }: ImageGal
         </div>
       )}
 
-      {/* 3. Screenshot Lightbox Dialog Modal (Checkout Modal Style with Full Navigation) */}
+      {/* 3. Screenshot Lightbox Dialog Modal (Full Widescreen Responsive & Universal Fit) */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden border border-border/70 shadow-2xl rounded-2xl sm:rounded-3xl bg-background/95 backdrop-blur-xl">
-          {/* Modal Header */}
-          <div className="flex items-center justify-between px-5 py-3.5 pr-14 border-b border-border/60 bg-muted/40">
-            <div className="flex items-center gap-3 min-w-0">
-              <span className="font-bold text-sm sm:text-base text-foreground truncate">
+        <DialogContent 
+          showCloseButton={false}
+          className="w-[96vw] max-w-[96vw] sm:max-w-[92vw] lg:max-w-6xl xl:max-w-7xl max-h-[94vh] p-0 overflow-hidden border border-border/80 shadow-2xl rounded-2xl sm:rounded-3xl bg-background/98 backdrop-blur-2xl flex flex-col gap-0"
+        >
+          {/* Modal Header: Title + Badge + Dedicated Close Button (Zero collision) */}
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-border/60 bg-muted/40 shrink-0">
+            <div className="flex items-center gap-3 min-w-0 pr-3">
+              <span className="font-semibold text-sm sm:text-base text-foreground truncate max-w-[60vw]">
                 {productTitle}
               </span>
               <span className="shrink-0 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                {modalImageIndex + 1} of {validImages.length}
+                {modalImageIndex + 1} / {validImages.length}
               </span>
             </div>
+
+            <button
+              type="button"
+              onClick={() => setModalOpen(false)}
+              className="cursor-pointer rounded-full h-8 w-8 bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground flex items-center justify-center transition-all border border-border/60 hover:scale-105 shrink-0"
+              aria-label="Close screenshot preview"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
 
-          {/* Main Image Showcase with Floating Prev/Next Controls */}
-          <div className="relative p-2 sm:p-4 flex items-center justify-center bg-black/60 min-h-[300px] max-h-[66vh] overflow-hidden group/modal">
+          {/* Main Stage: Ambient Blur Glow + Universal object-contain + Floating Controls */}
+          <div className="relative flex-1 flex items-center justify-center bg-black/95 p-2 sm:p-4 min-h-[320px] max-h-[calc(94vh-140px)] w-full overflow-hidden select-none group/modal">
+            {/* Ambient Blurred Backdrop for Portrait/Square/Letterboxed Images */}
+            {validImages[modalImageIndex] && (
+              <div
+                className="absolute inset-0 bg-cover bg-center filter blur-2xl opacity-20 scale-110 pointer-events-none"
+                style={{ backgroundImage: `url(${validImages[modalImageIndex]})` }}
+              />
+            )}
+
             {/* Prev Button */}
             {validImages.length > 1 && (
               <button
                 type="button"
                 onClick={() => setModalImageIndex((prev) => (prev - 1 + validImages.length) % validImages.length)}
-                className="cursor-pointer absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-3 rounded-full bg-black/70 hover:bg-black/90 text-white border border-white/30 backdrop-blur-md transition-all hover:scale-110 shadow-2xl"
+                className="cursor-pointer absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 p-2.5 sm:p-3.5 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/20 backdrop-blur-md transition-all hover:scale-110 shadow-2xl hover:border-primary/50"
                 aria-label="Previous image"
               >
-                <ChevronLeft className="w-5 h-5 sm:w-7 sm:h-7" />
+                <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             )}
 
-            {/* Displayed Image */}
+            {/* Displayed Image: 100% Fit for Any Dimension (16:9, 9:16 portrait, 1:1 square, 4:3, etc.) */}
             {validImages[modalImageIndex] && (
               <img
                 src={validImages[modalImageIndex]}
                 alt={`${productTitle} Screenshot ${modalImageIndex + 1}`}
-                className="max-h-[60vh] max-w-full w-auto h-auto rounded-xl object-contain shadow-2xl transition-all duration-200"
+                className="relative z-10 max-h-[calc(94vh-160px)] max-w-full w-auto h-auto rounded-lg object-contain shadow-2xl transition-all duration-200"
+                style={{ maxHeight: "calc(94vh - 160px)", maxWidth: "100%" }}
               />
             )}
 
@@ -353,33 +406,34 @@ export function ImageGallery({ images, youtubeEmbedUrl, productTitle }: ImageGal
               <button
                 type="button"
                 onClick={() => setModalImageIndex((prev) => (prev + 1) % validImages.length)}
-                className="cursor-pointer absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-3 rounded-full bg-black/70 hover:bg-black/90 text-white border border-white/30 backdrop-blur-md transition-all hover:scale-110 shadow-2xl"
+                className="cursor-pointer absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-30 p-2.5 sm:p-3.5 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/20 backdrop-blur-md transition-all hover:scale-110 shadow-2xl hover:border-primary/50"
                 aria-label="Next image"
               >
-                <ChevronRight className="w-5 h-5 sm:w-7 sm:h-7" />
+                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             )}
           </div>
 
           {/* Bottom Thumbnails Strip for Quick Scrolling inside Modal */}
           {validImages.length > 1 && (
-            <div className="flex items-center justify-center gap-2 p-3 bg-muted/30 border-t border-border/60 overflow-x-auto scrollbar-none">
+            <div className="flex items-center justify-center gap-2 p-2.5 sm:p-3 bg-muted/40 border-t border-border/60 overflow-x-auto scrollbar-none shrink-0">
               {validImages.map((imgUrl, idx) => (
                 <button
                   key={idx}
                   type="button"
                   onClick={() => setModalImageIndex(idx)}
                   className={cn(
-                    "cursor-pointer relative flex-shrink-0 w-16 h-10 sm:w-20 sm:h-12 rounded-lg overflow-hidden border-2 transition-all",
+                    "cursor-pointer relative flex-shrink-0 w-16 h-11 sm:w-20 sm:h-14 rounded-lg overflow-hidden border-2 transition-all bg-black/50 p-0.5",
                     modalImageIndex === idx
                       ? "border-primary ring-2 ring-primary/40 scale-105"
                       : "border-border/60 opacity-60 hover:opacity-100"
                   )}
+                  aria-label={`Jump to screenshot ${idx + 1}`}
                 >
                   <img
                     src={imgUrl}
                     alt={`Thumb ${idx + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 </button>
               ))}

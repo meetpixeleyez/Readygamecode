@@ -18,13 +18,10 @@ node_modules/
 next-env.d.ts
 
 # Environment variables & secrets
-.env
 .env*.local
 .env.development.local
 .env.test.local
 .env.production.local
-.env.production
-.env.staging
 !.env.example
 
 # Logs
@@ -61,7 +58,6 @@ Thumbs.db
 
 # IDE and Editor configurations
 .idea/
-.vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
 !.vscode/launch.json
@@ -74,3 +70,4 @@ Thumbs.db
 coverage/
 .nyc_output/
 .turbo
+config.bat

@@ -251,7 +251,6 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
   if (screenshots.length === 0 && product.thumbnail) {
     screenshots = [product.thumbnail];
-    screenshots = [product.thumbnail, ...screenshots];
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://readygamecode.com";
